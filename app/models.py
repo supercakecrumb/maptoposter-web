@@ -32,6 +32,13 @@ class Job(db.Model):
     longitude = db.Column(db.Float, nullable=False)
     preview_mode = db.Column(db.Boolean, default=False)
     
+    # Page format fields
+    page_format = db.Column(db.String(20), nullable=False, default='classic')
+    orientation = db.Column(db.String(10), nullable=False, default='portrait')
+    dpi = db.Column(db.Integer, nullable=False, default=300)
+    custom_width_inches = db.Column(db.Float, nullable=True)
+    custom_height_inches = db.Column(db.Float, nullable=True)
+    
     # Job status
     status = db.Column(db.Enum(JobStatus), nullable=False, default=JobStatus.PENDING, index=True)
     progress = db.Column(db.Integer, default=0)
@@ -133,8 +140,17 @@ class Poster(db.Model):
     filename = db.Column(db.String(255), nullable=False)
     file_path = db.Column(db.String(500), nullable=False)
     file_size = db.Column(db.BigInteger, nullable=False)  # bytes
-    width = db.Column(db.Integer, nullable=False)
-    height = db.Column(db.Integer, nullable=False)
+    width = db.Column(db.Integer, nullable=False)  # Pixel width
+    height = db.Column(db.Integer, nullable=False)  # Pixel height
+    
+    # Page format fields
+    page_format = db.Column(db.String(20), nullable=False, default='classic')
+    orientation = db.Column(db.String(10), nullable=False, default='portrait')
+    dpi = db.Column(db.Integer, nullable=False, default=300)
+    width_inches = db.Column(db.Float, nullable=False, default=12.0)
+    height_inches = db.Column(db.Float, nullable=False, default=16.0)
+    custom_width_inches = db.Column(db.Float, nullable=True)
+    custom_height_inches = db.Column(db.Float, nullable=True)
     
     # Additional file paths
     thumbnail_path = db.Column(db.String(500))
@@ -164,13 +180,26 @@ class Poster(db.Model):
             'longitude': self.longitude,
             'filename': self.filename,
             'file_size': self.file_size,
+            'page_format': self.page_format,
+            'orientation': self.orientation,
+            'dpi': self.dpi,
             'dimensions': {
-                'width': self.width,
-                'height': self.height
+                'width_px': self.width,
+                'height_px': self.height,
+                'width_inches': self.width_inches,
+                'height_inches': self.height_inches,
+                'dpi': self.dpi
             },
             'created_at': self.created_at.isoformat() + 'Z' if self.created_at else None,
             'download_count': self.download_count
         }
+        
+        # Add custom dimensions if applicable
+        if self.page_format == 'custom' and self.custom_width_inches and self.custom_height_inches:
+            result['custom_dimensions'] = {
+                'width_inches': self.custom_width_inches,
+                'height_inches': self.custom_height_inches
+            }
         
         if include_urls:
             result['download_url'] = f'/api/v1/posters/{self.id}/download'

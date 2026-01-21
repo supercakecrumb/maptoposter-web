@@ -7,7 +7,78 @@ from app.services.theme_service import ThemeService
 from app.services.geocoding_service import GeocodingService
 from app.models import Poster
 from app.extensions import db
+from app.utils.format_helpers import get_format_dimensions, validate_dpi
 import os
+
+
+def validate_format_parameters(data: dict) -> dict:
+    """
+    Validate page format parameters.
+    
+    Args:
+        data: Request data dictionary
+        
+    Returns:
+        Dict with validated format parameters
+        
+    Raises:
+        ValueError with descriptive message if validation fails
+    """
+    # Get parameters with defaults
+    page_format = data.get('page_format', current_app.config['DEFAULT_PAGE_FORMAT'])
+    orientation = data.get('orientation', current_app.config['DEFAULT_ORIENTATION'])
+    dpi = data.get('dpi', current_app.config['DEFAULT_DPI'])
+    
+    # Validate format exists
+    if page_format not in current_app.config['PAGE_FORMATS']:
+        valid_formats = list(current_app.config['PAGE_FORMATS'].keys())
+        raise ValueError(f"Invalid page_format. Must be one of: {valid_formats}")
+    
+    # Validate orientation
+    if orientation not in ['portrait', 'landscape']:
+        raise ValueError("orientation must be 'portrait' or 'landscape'")
+    
+    # Validate DPI
+    try:
+        dpi = int(dpi)
+        dpi = validate_dpi(dpi)
+    except (ValueError, TypeError) as e:
+        valid_dpis = list(current_app.config['DPI_OPTIONS'].keys())
+        raise ValueError(f"Invalid DPI. Must be one of: {valid_dpis}")
+    
+    # Handle custom format
+    custom_width = None
+    custom_height = None
+    if page_format == 'custom':
+        custom_width = data.get('custom_width')
+        custom_height = data.get('custom_height')
+        
+        if custom_width is None or custom_height is None:
+            raise ValueError("custom_width and custom_height are required for custom format")
+        
+        try:
+            custom_width = float(custom_width)
+            custom_height = float(custom_height)
+        except (ValueError, TypeError):
+            raise ValueError("custom_width and custom_height must be numeric")
+    
+    # Get actual dimensions (validates custom dimensions if applicable)
+    try:
+        width_inches, height_inches = get_format_dimensions(
+            page_format, orientation, custom_width, custom_height
+        )
+    except ValueError as e:
+        raise ValueError(f"Format validation error: {str(e)}")
+    
+    return {
+        'page_format': page_format,
+        'orientation': orientation,
+        'custom_width_inches': custom_width,
+        'custom_height_inches': custom_height,
+        'dpi': dpi,
+        'width_inches': width_inches,
+        'height_inches': height_inches
+    }
 
 
 @api_v1.route('/posters', methods=['POST'])
@@ -93,6 +164,15 @@ def create_poster():
         
         preview_mode = data.get('preview_mode', False)
         
+        # Validate format parameters
+        try:
+            format_params = validate_format_parameters(data)
+        except ValueError as e:
+            return jsonify({
+                'error': 'Format validation error',
+                'message': str(e)
+            }), 400
+        
         # Get or create session ID
         if 'session_id' not in session:
             import uuid
@@ -109,7 +189,13 @@ def create_poster():
             latitude=latitude,
             longitude=longitude,
             preview_mode=preview_mode,
-            session_id=session_id
+            session_id=session_id,
+            # Format parameters
+            page_format=format_params['page_format'],
+            orientation=format_params['orientation'],
+            custom_width_inches=format_params.get('custom_width_inches'),
+            custom_height_inches=format_params.get('custom_height_inches'),
+            dpi=format_params['dpi']
         )
         
         return jsonify(result), 202
@@ -427,6 +513,15 @@ def create_batch_posters():
         
         preview_mode = data.get('preview_mode', False)
         
+        # Validate format parameters
+        try:
+            format_params = validate_format_parameters(data)
+        except ValueError as e:
+            return jsonify({
+                'error': 'Format validation error',
+                'message': str(e)
+            }), 400
+        
         # Get or create session ID
         if 'session_id' not in session:
             import uuid
@@ -443,7 +538,13 @@ def create_batch_posters():
             latitude=latitude,
             longitude=longitude,
             preview_mode=preview_mode,
-            session_id=session_id
+            session_id=session_id,
+            # Format parameters
+            page_format=format_params['page_format'],
+            orientation=format_params['orientation'],
+            custom_width_inches=format_params.get('custom_width_inches'),
+            custom_height_inches=format_params.get('custom_height_inches'),
+            dpi=format_params['dpi']
         )
         
         return jsonify(result), 202
@@ -572,4 +673,30 @@ def download_batch_posters(batch_id):
         return jsonify({
             'error': 'Internal server error',
             'message': 'Failed to download batch posters'
+        }), 500
+
+
+@api_v1.route('/formats', methods=['GET'])
+def get_page_formats():
+    """
+    Get available page formats and DPI options.
+    
+    Returns:
+        JSON response with format configurations and DPI options
+    """
+    try:
+        return jsonify({
+            'formats': current_app.config['PAGE_FORMATS'],
+            'dpi_options': current_app.config['DPI_OPTIONS'],
+            'defaults': {
+                'page_format': current_app.config['DEFAULT_PAGE_FORMAT'],
+                'orientation': current_app.config['DEFAULT_ORIENTATION'],
+                'dpi': current_app.config['DEFAULT_DPI']
+            }
+        }), 200
+    except Exception as e:
+        current_app.logger.error(f"Error fetching formats: {e}")
+        return jsonify({
+            'error': 'Internal server error',
+            'message': 'Failed to fetch format configuration'
         }), 500

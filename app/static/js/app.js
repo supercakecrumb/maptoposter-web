@@ -105,8 +105,17 @@ function posterCreator() {
             theme: 'noir',
             distance: 29000,
             latitude: null,
-            longitude: null
+            longitude: null,
+            // NEW format fields
+            page_format: 'classic',
+            orientation: 'portrait',
+            custom_width: 12,
+            custom_height: 16,
+            dpi: 300
         },
+        formats: [],
+        dpiOptions: [],
+        showDpiHelp: false,
         themes: [],
         selectedThemeIds: [],
         suggestions: [],
@@ -117,9 +126,32 @@ function posterCreator() {
         
         async init() {
             try {
-                const response = await fetch('/api/v1/themes');
-                const data = await response.json();
-                this.themes = data.themes;
+                // Load themes
+                const themesResponse = await fetch('/api/v1/themes');
+                const themesData = await themesResponse.json();
+                this.themes = themesData.themes;
+                
+                // Load formats and DPI options
+                const formatsResponse = await fetch('/api/v1/formats');
+                const formatsData = await formatsResponse.json();
+                
+                // Convert formats object to array
+                this.formats = Object.entries(formatsData.formats).map(([id, config]) => ({
+                    id,
+                    ...config
+                }));
+                
+                // Convert DPI options object to array with additional UI info
+                this.dpiOptions = Object.entries(formatsData.dpi_options).map(([value, config]) => ({
+                    value: parseInt(value),
+                    ...config,
+                    processing_time: this.estimateProcessingTime(parseInt(value))
+                }));
+                
+                // Set defaults
+                this.form.page_format = formatsData.defaults.page_format;
+                this.form.orientation = formatsData.defaults.orientation;
+                this.form.dpi = formatsData.defaults.dpi;
                 
                 // Check for query parameters
                 const urlParams = new URLSearchParams(window.location.search);
@@ -149,7 +181,85 @@ function posterCreator() {
                     this.selectedThemeIds = [this.themes[0].id];
                 }
             } catch (error) {
-                console.error('Failed to load themes:', error);
+                console.error('Failed to load configuration:', error);
+            }
+        },
+        
+        estimateProcessingTime(dpi) {
+            // Rough estimates based on DPI
+            const times = {
+                150: '~30-60 seconds',
+                300: '~60-120 seconds',
+                600: '~2-5 minutes'
+            };
+            return times[dpi] || 'Unknown';
+        },
+        
+        get selectedFormat() {
+            return this.formats.find(f => f.id === this.form.page_format);
+        },
+        
+        get canChangeOrientation() {
+            const format = this.selectedFormat;
+            return format && format.orientable !== false;
+        },
+        
+        get formatDimensionsText() {
+            const format = this.selectedFormat;
+            if (!format) return '';
+            
+            if (format.id === 'custom') {
+                return 'Enter custom dimensions below';
+            }
+            
+            const width = format.width_inches;
+            const height = format.height_inches;
+            
+            if (this.form.orientation === 'landscape') {
+                return `${Math.max(width, height).toFixed(2)}" × ${Math.min(width, height).toFixed(2)}" (landscape)`;
+            } else {
+                return `${Math.min(width, height).toFixed(2)}" × ${Math.max(width, height).toFixed(2)}" (portrait)`;
+            }
+        },
+        
+        get outputDetailsText() {
+            const format = this.selectedFormat;
+            if (!format) return '';
+            
+            let width, height;
+            
+            if (format.id === 'custom') {
+                width = parseFloat(this.form.custom_width) || 0;
+                height = parseFloat(this.form.custom_height) || 0;
+            } else {
+                width = format.width_inches;
+                height = format.height_inches;
+            }
+            
+            if (this.form.orientation === 'landscape') {
+                [width, height] = [Math.max(width, height), Math.min(width, height)];
+            } else {
+                [width, height] = [Math.min(width, height), Math.max(width, height)];
+            }
+            
+            const widthPx = Math.round(width * this.form.dpi);
+            const heightPx = Math.round(height * this.form.dpi);
+            const mpx = ((widthPx * heightPx) / 1000000).toFixed(1);
+            
+            return `${width.toFixed(1)}" × ${height.toFixed(1)}" at ${this.form.dpi} DPI = ${widthPx} × ${heightPx} pixels (${mpx} megapixels)`;
+        },
+        
+        onFormatChange() {
+            // Reset custom dimensions when switching from custom
+            if (this.form.page_format !== 'custom') {
+                // Auto-adjust orientation based on format
+                const format = this.selectedFormat;
+                if (format && format.aspect_ratio) {
+                    // Keep current orientation if possible
+                    if (!format.orientable) {
+                        this.form.orientation = 'portrait';
+                    }
+                }
             }
         },
         
@@ -216,12 +326,30 @@ function posterCreator() {
                 // Parse location for city/country if lat/lon not set
                 const locationParts = this.form.location.split(',').map(s => s.trim());
                 
+                const basePayload = {
+                    city: locationParts[0] || this.form.location,
+                    country: locationParts[1] || '',
+                    distance: this.form.distance,
+                    latitude: this.form.latitude,
+                    longitude: this.form.longitude,
+                    // NEW format parameters
+                    page_format: this.form.page_format,
+                    orientation: this.form.orientation,
+                    dpi: this.form.dpi
+                };
+                
+                // Add custom dimensions if applicable
+                if (this.form.page_format === 'custom') {
+                    basePayload.custom_width = parseFloat(this.form.custom_width);
+                    basePayload.custom_height = parseFloat(this.form.custom_height);
+                }
+                
                 if (this.selectedThemeIds.length > 1) {
                     // Batch mode - multiple themes
-                    await this.submitBatchPoster(locationParts);
+                    await this.submitBatchPoster(basePayload);
                 } else {
                     // Single theme mode
-                    await this.submitSinglePoster(locationParts);
+                    await this.submitSinglePoster(basePayload);
                 }
             } catch (error) {
                 this.error = 'Network error. Please try again.';
@@ -230,14 +358,10 @@ function posterCreator() {
             }
         },
         
-        async submitSinglePoster(locationParts) {
+        async submitSinglePoster(basePayload) {
             const payload = {
-                city: locationParts[0] || this.form.location,
-                country: locationParts[1] || '',
-                theme: this.selectedThemeIds[0],
-                distance: this.form.distance,
-                latitude: this.form.latitude,
-                longitude: this.form.longitude
+                ...basePayload,
+                theme: this.selectedThemeIds[0]
             };
             
             const response = await fetch('/api/v1/posters', {
@@ -258,14 +382,10 @@ function posterCreator() {
             }
         },
         
-        async submitBatchPoster(locationParts) {
+        async submitBatchPoster(basePayload) {
             const payload = {
-                city: locationParts[0] || this.form.location,
-                country: locationParts[1] || '',
-                themes: this.selectedThemeIds,
-                distance: this.form.distance,
-                latitude: this.form.latitude,
-                longitude: this.form.longitude
+                ...basePayload,
+                themes: this.selectedThemeIds
             };
             
             const response = await fetch('/api/v1/posters/batch', {
@@ -338,7 +458,7 @@ function jobMonitor(jobId) {
                         clearInterval(this.intervalId);
                     }
                     // Redirect to result page
-                    window.location.href = `/result/${data.result.poster_id}`;
+                    window.location.href = `/posters/${data.result.poster_id}`;
                     return;
                 }
                 

@@ -1,0 +1,131 @@
+2026-01-21 10:57:52,255 - INFO - Found database at: /Users/val-kiel/Personal/Fun/maptoposter-web/posters.db
+2026-01-21 10:57:52,255 - INFO - ======================================================================
+2026-01-21 10:57:52,255 - INFO - Starting database migration: add_page_format_dpi
+2026-01-21 10:57:52,255 - INFO - Database: /Users/val-kiel/Personal/Fun/maptoposter-web/posters.db
+2026-01-21 10:57:52,255 - INFO - Timestamp: 2026-01-21T10:57:52.255554
+2026-01-21 10:57:52,255 - INFO - ======================================================================
+2026-01-21 10:57:52,255 - INFO - Reading migration file: /Users/val-kiel/Personal/Fun/maptoposter-web/migrations/add_page_format_dpi.sql
+2026-01-21 10:57:52,255 - INFO - Database connection established ✓
+2026-01-21 10:57:52,255 - INFO - Checking which columns need to be added...
+2026-01-21 10:57:52,256 - INFO -   jobs: Missing columns: page_format, orientation, dpi, custom_width_inches, custom_height_inches
+2026-01-21 10:57:52,256 - INFO -   posters: Missing columns: page_format, orientation, dpi, custom_width_inches, custom_height_inches, width_inches, height_inches
+2026-01-21 10:57:52,256 - INFO - 
+======================================================================
+2026-01-21 10:57:52,256 - INFO - Applying migration...
+2026-01-21 10:57:52,256 - INFO - ======================================================================
+2026-01-21 10:57:52,256 - INFO - 
+======================================================================
+2026-01-21 10:57:52,256 - INFO - Migration completed successfully! ✓
+2026-01-21 10:57:52,256 - INFO -   Executed: 0 statements
+2026-01-21 10:57:52,256 - INFO -   Skipped: 0 statements (already applied)
+2026-01-21 10:57:52,256 - INFO - ======================================================================
+2026-01-21 10:57:52,256 - INFO - Database connection closed
+2026-01-21 10:58:12,633 - INFO - Found database at: /Users/val-kiel/Personal/Fun/maptoposter-web/posters.db
+2026-01-21 10:58:12,633 - INFO - ======================================================================
+2026-01-21 10:58:12,633 - INFO - Starting database migration: add_page_format_dpi
+2026-01-21 10:58:12,633 - INFO - Database: /Users/val-kiel/Personal/Fun/maptoposter-web/posters.db
+2026-01-21 10:58:12,633 - INFO - Timestamp: 2026-01-21T10:58:12.633774
+2026-01-21 10:58:12,633 - INFO - ======================================================================
+2026-01-21 10:58:12,633 - INFO - Reading migration file: /Users/val-kiel/Personal/Fun/maptoposter-web/migrations/add_page_format_dpi.sql
+2026-01-21 10:58:12,634 - INFO - Database connection established ✓
+2026-01-21 10:58:12,634 - INFO - Checking which columns need to be added...
+2026-01-21 10:58:12,634 - INFO -   jobs: Missing columns: page_format, orientation, dpi, custom_width_inches, custom_height_inches
+2026-01-21 10:58:12,634 - INFO -   posters: Missing columns: page_format, orientation, dpi, custom_width_inches, custom_height_inches, width_inches, height_inches
+2026-01-21 10:58:12,634 - INFO - 
+======================================================================
+2026-01-21 10:58:12,634 - INFO - Applying migration...
+2026-01-21 10:58:12,634 - INFO - ======================================================================
+2026-01-21 10:58:12,634 - INFO - Found 14 SQL statements to execute
+2026-01-21 10:58:12,634 - INFO -     → Success ✓
+2026-01-21 10:58:12,635 - INFO -     → Success ✓
+2026-01-21 10:58:12,635 - INFO -     → Success ✓
+2026-01-21 10:58:12,636 - INFO -     → Success ✓
+2026-01-21 10:58:12,636 - INFO -     → Success ✓
+2026-01-21 10:58:12,636 - INFO -   [6/14] Updating default values...
+2026-01-21 10:58:12,636 - INFO -     → Success ✓
+2026-01-21 10:58:12,637 - INFO -     → Success ✓
+2026-01-21 10:58:12,637 - INFO -     → Success ✓
+2026-01-21 10:58:12,637 - INFO -     → Success ✓
+2026-01-21 10:58:12,637 - INFO -     → Success ✓
+2026-01-21 10:58:12,637 - INFO -     → Success ✓
+2026-01-21 10:58:12,637 - INFO -     → Success ✓
+2026-01-21 10:58:12,637 - INFO -     → Success ✓
+2026-01-21 10:58:12,638 - INFO -   [14/14] Updating default values...
+2026-01-21 10:58:12,638 - INFO -     → Success ✓
+2026-01-21 10:58:12,638 - INFO - 
+======================================================================
+2026-01-21 10:58:12,638 - INFO - Migration completed successfully! ✓
+2026-01-21 10:58:12,638 - INFO -   Executed: 14 statements
+2026-01-21 10:58:12,638 - INFO -   Skipped: 0 statements (already applied)
+2026-01-21 10:58:12,638 - INFO - ======================================================================
+2026-01-21 10:58:12,638 - INFO - Database connection closed
+2026-01-21 10:58:19,919 - INFO - Found database at: /Users/val-kiel/Personal/Fun/maptoposter-web/posters.db
+2026-01-21 10:58:19,919 - INFO - ======================================================================
+2026-01-21 10:58:19,919 - INFO - Starting database migration: add_page_format_dpi
+2026-01-21 10:58:19,919 - INFO - Database: /Users/val-kiel/Personal/Fun/maptoposter-web/posters.db
+2026-01-21 10:58:19,919 - INFO - Timestamp: 2026-01-21T10:58:19.919420
+2026-01-21 10:58:19,919 - INFO - ======================================================================
+2026-01-21 10:58:19,919 - INFO - Reading migration file: /Users/val-kiel/Personal/Fun/maptoposter-web/migrations/add_page_format_dpi.sql
+2026-01-21 10:58:19,919 - INFO - Database connection established ✓
+2026-01-21 10:58:19,919 - INFO - Checking which columns need to be added...
+2026-01-21 10:58:19,919 - INFO -   jobs: All columns already exist ✓
+2026-01-21 10:58:19,919 - INFO -   posters: All columns already exist ✓
+2026-01-21 10:58:19,919 - INFO - 
+======================================================================
+2026-01-21 10:58:19,919 - INFO - Migration not needed - all columns already exist!
+2026-01-21 10:58:19,919 - INFO - ======================================================================
+2026-01-21 10:58:19,919 - INFO - Database connection closed
+2026-01-21 11:04:48,694 - INFO - Found database at: /Users/val-kiel/Personal/Fun/maptoposter-web/posters.db
+2026-01-21 11:04:48,694 - INFO - ======================================================================
+2026-01-21 11:04:48,694 - INFO - Starting database migration: add_page_format_dpi
+2026-01-21 11:04:48,694 - INFO - Database: /Users/val-kiel/Personal/Fun/maptoposter-web/posters.db
+2026-01-21 11:04:48,694 - INFO - Timestamp: 2026-01-21T11:04:48.694165
+2026-01-21 11:04:48,694 - INFO - ======================================================================
+2026-01-21 11:04:48,694 - INFO - Reading migration file: /Users/val-kiel/Personal/Fun/maptoposter-web/migrations/add_page_format_dpi.sql
+2026-01-21 11:04:48,694 - INFO - Database connection established ✓
+2026-01-21 11:04:48,694 - INFO - Checking which columns need to be added...
+2026-01-21 11:04:48,694 - INFO -   jobs: All columns already exist ✓
+2026-01-21 11:04:48,694 - INFO -   posters: All columns already exist ✓
+2026-01-21 11:04:48,694 - INFO - 
+======================================================================
+2026-01-21 11:04:48,694 - INFO - Migration not needed - all columns already exist!
+2026-01-21 11:04:48,694 - INFO - ======================================================================
+2026-01-21 11:04:48,694 - INFO - Database connection closed
+2026-01-21 11:09:04,856 - INFO - ======================================================================
+2026-01-21 11:09:04,856 - INFO - Starting database migration: add_page_format_dpi
+2026-01-21 11:09:04,856 - INFO - Database: instance/posters.db
+2026-01-21 11:09:04,856 - INFO - Timestamp: 2026-01-21T11:09:04.856470
+2026-01-21 11:09:04,856 - INFO - ======================================================================
+2026-01-21 11:09:04,856 - INFO - Reading migration file: /Users/val-kiel/Personal/Fun/maptoposter-web/migrations/add_page_format_dpi.sql
+2026-01-21 11:09:04,856 - INFO - Database connection established ✓
+2026-01-21 11:09:04,856 - INFO - Checking which columns need to be added...
+2026-01-21 11:09:04,856 - INFO -   jobs: Missing columns: page_format, orientation, dpi, custom_width_inches, custom_height_inches
+2026-01-21 11:09:04,856 - INFO -   posters: Missing columns: page_format, orientation, dpi, custom_width_inches, custom_height_inches, width_inches, height_inches
+2026-01-21 11:09:04,856 - INFO - 
+======================================================================
+2026-01-21 11:09:04,857 - INFO - Applying migration...
+2026-01-21 11:09:04,857 - INFO - ======================================================================
+2026-01-21 11:09:04,857 - INFO - Found 14 SQL statements to execute
+2026-01-21 11:09:04,857 - INFO -     → Success ✓
+2026-01-21 11:09:04,858 - INFO -     → Success ✓
+2026-01-21 11:09:04,858 - INFO -     → Success ✓
+2026-01-21 11:09:04,859 - INFO -     → Success ✓
+2026-01-21 11:09:04,859 - INFO -     → Success ✓
+2026-01-21 11:09:04,859 - INFO -   [6/14] Updating default values...
+2026-01-21 11:09:04,859 - INFO -     → Success ✓
+2026-01-21 11:09:04,859 - INFO -     → Success ✓
+2026-01-21 11:09:04,860 - INFO -     → Success ✓
+2026-01-21 11:09:04,860 - INFO -     → Success ✓
+2026-01-21 11:09:04,860 - INFO -     → Success ✓
+2026-01-21 11:09:04,860 - INFO -     → Success ✓
+2026-01-21 11:09:04,860 - INFO -     → Success ✓
+2026-01-21 11:09:04,860 - INFO -     → Success ✓
+2026-01-21 11:09:04,860 - INFO -   [14/14] Updating default values...
+2026-01-21 11:09:04,860 - INFO -     → Success ✓
+2026-01-21 11:09:04,860 - INFO - 
+======================================================================
+2026-01-21 11:09:04,860 - INFO - Migration completed successfully! ✓
+2026-01-21 11:09:04,860 - INFO -   Executed: 14 statements
+2026-01-21 11:09:04,860 - INFO -   Skipped: 0 statements (already applied)
+2026-01-21 11:09:04,860 - INFO - ======================================================================
+2026-01-21 11:09:04,860 - INFO - Database connection closed

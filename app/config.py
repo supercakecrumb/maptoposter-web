@@ -42,6 +42,119 @@ class Config:
     MIN_DISTANCE = 1000   # meters
     DEFAULT_DISTANCE = 29000  # meters
     
+    # Page Format Configuration
+    PAGE_FORMATS = {
+        'classic': {
+            'name': 'Classic Poster',
+            'width_inches': 12,
+            'height_inches': 16,
+            'aspect_ratio': 0.75,  # 3:4
+            'description': 'Original 12×16 inch format',
+            'orientable': True
+        },
+        'a4': {
+            'name': 'A4',
+            'width_mm': 210,
+            'height_mm': 297,
+            'width_inches': 8.27,
+            'height_inches': 11.69,
+            'aspect_ratio': 0.707,  # √2
+            'description': 'Standard A4 (210×297mm)',
+            'orientable': True
+        },
+        'a3': {
+            'name': 'A3',
+            'width_mm': 297,
+            'height_mm': 420,
+            'width_inches': 11.69,
+            'height_inches': 16.54,
+            'aspect_ratio': 0.707,  # √2
+            'description': 'Standard A3 (297×420mm)',
+            'orientable': True
+        },
+        'a2': {
+            'name': 'A2',
+            'width_mm': 420,
+            'height_mm': 594,
+            'width_inches': 16.54,
+            'height_inches': 23.39,
+            'aspect_ratio': 0.707,  # √2
+            'description': 'Standard A2 (420×594mm)',
+            'orientable': True
+        },
+        '30x40': {
+            'name': '30×40 cm',
+            'width_cm': 30,
+            'height_cm': 40,
+            'width_inches': 11.81,
+            'height_inches': 15.75,
+            'aspect_ratio': 0.75,  # 3:4
+            'description': 'Popular print size 30×40cm',
+            'orientable': True
+        },
+        '40x50': {
+            'name': '40×50 cm',
+            'width_cm': 40,
+            'height_cm': 50,
+            'width_inches': 15.75,
+            'height_inches': 19.69,
+            'aspect_ratio': 0.8,  # 4:5
+            'description': 'Popular print size 40×50cm',
+            'orientable': True
+        },
+        '50x70': {
+            'name': '50×70 cm',
+            'width_cm': 50,
+            'height_cm': 70,
+            'width_inches': 19.69,
+            'height_inches': 27.56,
+            'aspect_ratio': 0.714,  # 5:7
+            'description': 'Popular print size 50×70cm',
+            'orientable': True
+        },
+        'custom': {
+            'name': 'Custom Size',
+            'description': 'User-defined dimensions',
+            'orientable': True,
+            'requires_dimensions': True
+        }
+    }
+    
+    # DPI Configuration
+    DPI_OPTIONS = {
+        150: {
+            'name': 'Screen/Web (150 DPI)',
+            'description': 'Fast preview, suitable for screen viewing',
+            'use_cases': ['Digital display', 'Quick preview', 'Social media'],
+            'recommended_for': 'Preview and web use',
+            'file_size': 'Small (~2-5 MB)',
+            'quality': 'Basic'
+        },
+        300: {
+            'name': 'Standard Print (300 DPI)',
+            'description': 'Standard print quality for most applications',
+            'use_cases': ['Home printing', 'Photo prints', 'Standard posters'],
+            'recommended_for': 'Most printing needs',
+            'file_size': 'Medium (~8-20 MB)',
+            'quality': 'High'
+        },
+        600: {
+            'name': 'Professional Print (600 DPI)',
+            'description': 'Highest quality for professional printing',
+            'use_cases': ['Commercial printing', 'Gallery quality', 'Fine art'],
+            'recommended_for': 'Professional print services',
+            'file_size': 'Large (~30-80 MB)',
+            'quality': 'Maximum'
+        }
+    }
+    
+    # Validation Limits
+    MIN_PAGE_SIZE_INCHES = 4    # Minimum 4 inches
+    MAX_PAGE_SIZE_INCHES = 48   # Maximum 48 inches (4 feet)
+    DEFAULT_PAGE_FORMAT = 'classic'
+    DEFAULT_DPI = 300
+    DEFAULT_ORIENTATION = 'portrait'
+    
     # Rate Limiting
     GEOCODING_RATE_LIMIT = 10  # requests per minute
     API_RATE_LIMIT = 100  # requests per minute

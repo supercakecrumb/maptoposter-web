@@ -68,6 +68,9 @@ class BatchPosterGenerator:
         themes: List[str],
         distance: int = 29000,
         preview_mode: bool = False,
+        width_inches: float = 12.0,
+        height_inches: float = 16.0,
+        dpi: int = 300,
         progress_callback: Optional[Callable] = None,
         job_progress_callback: Optional[Callable] = None,
         result_callback: Optional[Callable] = None
@@ -84,7 +87,10 @@ class BatchPosterGenerator:
             country: Country name
             themes: List of theme names to generate
             distance: Map radius in meters (default: 29000)
-            preview_mode: Use lower DPI for faster preview rendering
+            preview_mode: Use lower DPI for faster preview rendering (deprecated, use dpi parameter)
+            width_inches: Width of poster in inches (default: 12.0)
+            height_inches: Height of poster in inches (default: 16.0)
+            dpi: DPI resolution (default: 300)
             progress_callback: Optional callback(current_step, total_steps, message)
             job_progress_callback: Optional callback(theme, step_message, progress_percent)
                                    Called for each individual job's progress
@@ -170,7 +176,9 @@ class BatchPosterGenerator:
                         country=country,
                         point=point,
                         output_file=output_file,
-                        preview_mode=preview_mode
+                        width_inches=width_inches,
+                        height_inches=height_inches,
+                        dpi=dpi
                     )
                     results.append(result)
                     
@@ -254,7 +262,9 @@ class BatchPosterGenerator:
         country: str,
         point: Tuple[float, float],
         output_file: str,
-        preview_mode: bool = False
+        width_inches: float = 12.0,
+        height_inches: float = 16.0,
+        dpi: int = 300
     ) -> Dict:
         """
         Helper method to render a single theme.
@@ -269,7 +279,9 @@ class BatchPosterGenerator:
             country: Country name
             point: (latitude, longitude) tuple
             output_file: Path where poster will be saved
-            preview_mode: Use lower DPI for faster rendering
+            width_inches: Width of poster in inches
+            height_inches: Height of poster in inches
+            dpi: DPI resolution
             
         Returns:
             Result dictionary with status, filename, or error information
@@ -282,7 +294,7 @@ class BatchPosterGenerator:
             theme = load_theme(theme_name)
             
             # Render poster
-            logger.info(f"Rendering {theme_name} to {output_file}")
+            logger.info(f"Rendering {theme_name} to {output_file} at {width_inches}\"x{height_inches}\" @ {dpi} DPI")
             render_poster(
                 map_data=map_data,
                 theme=theme,
@@ -290,7 +302,9 @@ class BatchPosterGenerator:
                 country=country,
                 point=point,
                 output_file=output_file,
-                preview_mode=preview_mode
+                width_inches=width_inches,
+                height_inches=height_inches,
+                dpi=dpi
             )
             
             # Verify file was created
@@ -301,15 +315,18 @@ class BatchPosterGenerator:
             file_size = os.path.getsize(output_file)
             render_time = (datetime.now() - start_time).total_seconds()
             
-            # Get image dimensions
-            width, height = 3600, 4800  # Default dimensions (12x16 inches at 300 DPI)
+            # Calculate pixel dimensions
+            width = int(width_inches * dpi)
+            height = int(height_inches * dpi)
+            
+            # Try to get actual dimensions from image file
             try:
                 from PIL import Image
                 with Image.open(output_file) as img:
                     width, height = img.size
                     logger.info(f"Image dimensions: {width}x{height}")
             except Exception as e:
-                logger.warning(f"Could not read image dimensions, using defaults: {e}")
+                logger.warning(f"Could not read image dimensions, using calculated: {e}")
             
             result = {
                 'status': 'success',

@@ -22,6 +22,7 @@ import matplotlib
 matplotlib.use('Agg')  # Use non-interactive backend for thread safety
 import matplotlib.pyplot as plt
 from matplotlib.font_manager import FontProperties
+from matplotlib.textpath import TextPath
 import matplotlib.colors as mcolors
 import numpy as np
 from geopy.geocoders import Nominatim
@@ -135,6 +136,94 @@ def load_theme(theme_name: str = "feature_based") -> Dict:
         if 'description' in theme:
             logger.debug(f"Theme description: {theme['description']}")
         return theme
+
+
+def calculate_scaled_font_size(base_size: float, width_inches: float,
+                                base_width: float = 12.0) -> float:
+    """
+    Calculate scaled font size based on page width.
+    
+    Args:
+        base_size: Base font size (designed for 12" width)
+        width_inches: Current page width in inches
+        base_width: Base width for design (default 12.0 inches)
+        
+    Returns:
+        Scaled font size
+    """
+    scale_factor = width_inches / base_width
+    return base_size * scale_factor
+
+
+def calculate_fitted_font_size(text: str, base_size: float, max_width_ratio: float,
+                                font_path: str, fig_width_inches: float, min_size: float = 20.0) -> float:
+    """
+    Calculate font size to fit text within available width using accurate measurements.
+    
+    Args:
+        text: The text to measure
+        base_size: The starting font size
+        max_width_ratio: Maximum width as ratio of figure width (0.0-1.0)
+        font_path: Path to the font file
+        fig_width_inches: Actual figure width in inches
+        min_size: Minimum font size to ensure readability
+        
+    Returns:
+        Adjusted font size that fits within max_width_ratio
+    """
+    font_size = base_size
+    
+    # Calculate max width in points (1 inch = 72 points)
+    max_width_points = fig_width_inches * max_width_ratio * 72.0
+    
+    logger.debug(f"Fitting text '{text[:20]}...' to {max_width_ratio*100:.0f}% of {fig_width_inches:.2f}\" = {max_width_points:.1f} points")
+    logger.debug(f"Starting font size: {base_size:.1f}pt")
+    
+    iterations = 0
+    max_iterations = 50  # Safety limit
+    
+    while font_size > min_size and iterations < max_iterations:
+        iterations += 1
+        
+        # Create font properties with current size
+        font_props = FontProperties(fname=font_path, size=font_size)
+        
+        try:
+            # Create text path to measure actual rendered width
+            text_path = TextPath((0, 0), text, prop=font_props)
+            bbox = text_path.get_extents()
+            text_width = bbox.width
+            
+            logger.debug(f"Iteration {iterations}: font_size={font_size:.1f}pt, text_width={text_width:.1f}pt, max={max_width_points:.1f}pt")
+            
+            # Check if text fits with 5% safety margin
+            if text_width <= max_width_points * 0.95:
+                logger.info(f"Text fitted successfully: {font_size:.1f}pt (width: {text_width:.1f}/{max_width_points:.1f}pt)")
+                break
+                
+        except Exception as e:
+            # If measurement fails, use character-based approximation
+            logger.warning(f"Text measurement failed, using approximation: {e}")
+            # Approximate: each character is ~60% of font size in width
+            # For spaced text with "  " between chars, multiply by effective char count
+            char_count = len(text)
+            estimated_width = char_count * font_size * 0.6
+            
+            logger.debug(f"Approximation: {char_count} chars × {font_size:.1f}pt × 0.6 = {estimated_width:.1f}pt")
+            
+            if estimated_width <= max_width_points * 0.95:
+                logger.info(f"Text fitted via approximation: {font_size:.1f}pt")
+                break
+        
+        # Reduce font size by 10% each iteration
+        font_size *= 0.90
+    
+    final_size = max(font_size, min_size)
+    
+    if final_size == min_size:
+        logger.warning(f"Font size reduced to minimum: {min_size}pt (may still overflow)")
+    
+    return final_size
 
 
 def create_gradient_fade(ax, color: str, location: str = 'bottom', zorder: int = 10):
@@ -356,9 +445,10 @@ def fetch_map_data(point: Tuple[float, float], distance: int,
     return map_data
 
 
-def render_poster(map_data: Dict, theme: Dict, city: str, country: str, 
-                 point: Tuple[float, float], output_file: str, 
-                 preview_mode: bool = False, progress_callback: Optional[Callable] = None):
+def render_poster(map_data: Dict, theme: Dict, city: str, country: str,
+                 point: Tuple[float, float], output_file: str,
+                 width_inches: float, height_inches: float, dpi: int,
+                 progress_callback: Optional[Callable] = None):
     """
     Render a map poster using pre-fetched map data.
     
@@ -369,13 +459,15 @@ def render_poster(map_data: Dict, theme: Dict, city: str, country: str,
         country: Country name for the poster text
         point: Tuple of (latitude, longitude)
         output_file: Path where the poster will be saved
-        preview_mode: If True, use lower DPI (150) for faster preview rendering. Default False uses DPI 300.
+        width_inches: Width of the poster in inches
+        height_inches: Height of the poster in inches
+        dpi: DPI resolution for output
         progress_callback: Optional callback function(stage_name) called at rendering stages
     """
     logger.info(f"Rendering map for {city}, {country}...")
     logger.info(f"Theme: {theme.get('name', 'Unknown')}")
+    logger.info(f"Dimensions: {width_inches}\" × {height_inches}\" at {dpi} DPI")
     logger.info(f"Output: {output_file}")
-    logger.info(f"Preview mode: {preview_mode}")
     
     # Log theme colors for debugging
     logger.debug(f"Theme colors - BG: {theme.get('bg')}, Water: {theme.get('water')}, Parks: {theme.get('parks')}")
@@ -392,7 +484,7 @@ def render_poster(map_data: Dict, theme: Dict, city: str, country: str,
     if progress_callback:
         progress_callback("initializing")
     
-    fig, ax = plt.subplots(figsize=(12, 16), facecolor=theme['bg'])
+    fig, ax = plt.subplots(figsize=(width_inches, height_inches), facecolor=theme['bg'])
     ax.set_facecolor(theme['bg'])
     ax.set_position([0, 0, 1, 1])
     
@@ -436,23 +528,54 @@ def render_poster(map_data: Dict, theme: Dict, city: str, country: str,
     create_gradient_fade(ax, theme['gradient_color'], location='bottom', zorder=10)
     create_gradient_fade(ax, theme['gradient_color'], location='top', zorder=10)
     
-    # Typography using Roboto font
+    # Typography using Roboto font with dynamic scaling
     if progress_callback:
         progress_callback("adding_typography")
     
-    if FONTS:
-        font_main = FontProperties(fname=FONTS['bold'], size=60)
-        font_top = FontProperties(fname=FONTS['bold'], size=40)
-        font_sub = FontProperties(fname=FONTS['light'], size=22)
-        font_coords = FontProperties(fname=FONTS['regular'], size=14)
-    else:
-        # Fallback to system fonts
-        font_main = FontProperties(family='monospace', weight='bold', size=60)
-        font_top = FontProperties(family='monospace', weight='bold', size=40)
-        font_sub = FontProperties(family='monospace', weight='normal', size=22)
-        font_coords = FontProperties(family='monospace', size=14)
+    # Base font sizes (designed for 12" width poster)
+    BASE_WIDTH = 12.0
+    BASE_CITY_SIZE = 72
+    BASE_COUNTRY_SIZE = 24
+    BASE_COORDS_SIZE = 18
+    BASE_ATTR_SIZE = 8
     
+    # Calculate scale factor for current poster width
+    scale_factor = width_inches / BASE_WIDTH
+    logger.info(f"Typography scale factor: {scale_factor:.2f} (width: {width_inches}\")")
+    
+    # Calculate scaled base sizes
+    scaled_city_size = calculate_scaled_font_size(BASE_CITY_SIZE, width_inches, BASE_WIDTH)
+    scaled_country_size = calculate_scaled_font_size(BASE_COUNTRY_SIZE, width_inches, BASE_WIDTH)
+    scaled_coords_size = calculate_scaled_font_size(BASE_COORDS_SIZE, width_inches, BASE_WIDTH)
+    scaled_attr_size = calculate_scaled_font_size(BASE_ATTR_SIZE, width_inches, BASE_WIDTH)
+    
+    # Create spaced city name
     spaced_city = "  ".join(list(city.upper()))
+    
+    # Auto-fit city name to available width (90% of poster width with margins)
+    if FONTS:
+        fitted_city_size = calculate_fitted_font_size(
+            spaced_city,
+            scaled_city_size,
+            0.90,  # 90% width (5% margins on each side)
+            FONTS['bold'],
+            width_inches,  # Pass actual poster width
+            min_size=20.0
+        )
+        
+        logger.info(f"City font size: {fitted_city_size:.1f}pt (scaled: {scaled_city_size:.1f}pt, base: {BASE_CITY_SIZE}pt)")
+        logger.info(f"Spaced city name: '{spaced_city}' ({len(spaced_city)} chars)")
+        
+        font_main = FontProperties(fname=FONTS['bold'], size=fitted_city_size)
+        font_sub = FontProperties(fname=FONTS['light'], size=scaled_country_size)
+        font_coords = FontProperties(fname=FONTS['regular'], size=scaled_coords_size)
+        font_attr = FontProperties(fname=FONTS['light'], size=scaled_attr_size)
+    else:
+        # Fallback to system fonts with scaling
+        font_main = FontProperties(family='monospace', weight='bold', size=scaled_city_size)
+        font_sub = FontProperties(family='monospace', weight='normal', size=scaled_country_size)
+        font_coords = FontProperties(family='monospace', size=scaled_coords_size)
+        font_attr = FontProperties(family='monospace', size=scaled_attr_size)
 
     # --- BOTTOM TEXT ---
     ax.text(0.5, 0.14, spaced_city, transform=ax.transAxes,
@@ -469,24 +592,20 @@ def render_poster(map_data: Dict, theme: Dict, city: str, country: str,
     ax.text(0.5, 0.07, coords, transform=ax.transAxes,
             color=theme['text'], alpha=0.7, ha='center', fontproperties=font_coords, zorder=11)
     
+    # Scale the decorative line width based on poster size
+    line_width = max(0.5, 1.0 * scale_factor)
     ax.plot([0.4, 0.6], [0.125, 0.125], transform=ax.transAxes,
-            color=theme['text'], linewidth=1, zorder=11)
+            color=theme['text'], linewidth=line_width, zorder=11)
 
     # --- ATTRIBUTION (bottom right) ---
-    if FONTS:
-        font_attr = FontProperties(fname=FONTS['light'], size=8)
-    else:
-        font_attr = FontProperties(family='monospace', size=8)
-    
     ax.text(0.98, 0.02, "© Aurorass maps", transform=ax.transAxes,
             color=theme['text'], alpha=0.5, ha='right', va='bottom',
             fontproperties=font_attr, zorder=11)
 
-    # Save with appropriate DPI
+    # Save with specified DPI
     if progress_callback:
         progress_callback("saving")
     
-    dpi = 150 if preview_mode else 300
     logger.info(f"Saving to {output_file}... (DPI: {dpi})")
     logger.debug(f"Figure background color: {theme['bg']}")
     plt.savefig(output_file, dpi=dpi, facecolor=theme['bg'])

@@ -279,3 +279,278 @@ input[type="range"]:focus::-webkit-slider-thumb {
     background-color: rgba(239, 68, 68, 0.2);
     color: #ef4444;
 }
+
+/* Page Format & DPI Selection Styles */
+
+/* Format selector dropdown */
+.format-selector {
+    transition: all 0.2s ease-in-out;
+}
+
+.format-selector:hover {
+    border-color: #3b82f6;
+}
+
+/* Orientation toggle buttons */
+.orientation-toggle {
+    display: flex;
+    gap: 0.75rem;
+}
+
+.orientation-button {
+    flex: 1;
+    padding: 0.75rem 1rem;
+    border: 2px solid #475569;
+    border-radius: 0.5rem;
+    background-color: #334155;
+    color: #d1d5db;
+    transition: all 0.2s ease-in-out;
+    cursor: pointer;
+}
+
+.orientation-button:hover {
+    border-color: #60a5fa;
+    transform: translateY(-2px);
+}
+
+.orientation-button.active {
+    background-color: #2563eb;
+    border-color: #2563eb;
+    color: white;
+}
+
+.orientation-button svg {
+    margin: 0 auto 0.25rem;
+}
+
+/* DPI selector cards */
+.dpi-selector {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 0.75rem;
+}
+
+.dpi-option {
+    padding: 1rem;
+    border: 2px solid #475569;
+    border-radius: 0.5rem;
+    background-color: #334155;
+    cursor: pointer;
+    transition: all 0.2s ease-in-out;
+    text-align: left;
+}
+
+.dpi-option:hover {
+    border-color: #60a5fa;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3);
+}
+
+.dpi-option.selected {
+    background-color: #2563eb;
+    border-color: #2563eb;
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.3);
+}
+
+.dpi-option-title {
+    font-weight: 600;
+    color: white;
+    margin-bottom: 0.25rem;
+}
+
+.dpi-option-subtitle {
+    font-size: 0.75rem;
+    color: #9ca3af;
+    margin-bottom: 0.5rem;
+}
+
+.dpi-option-details {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    font-size: 0.75rem;
+    color: #9ca3af;
+}
+
+.dpi-option-detail {
+    display: flex;
+    align-items: center;
+}
+
+.dpi-option-detail span:first-child {
+    margin-right: 0.5rem;
+}
+
+/* DPI help section */
+.dpi-help {
+    padding: 0.75rem;
+    background-color: rgba(30, 64, 175, 0.2);
+    border: 1px solid rgba(96, 165, 250, 0.3);
+    border-radius: 0.5rem;
+    font-size: 0.75rem;
+    color: #d1d5db;
+    margin-bottom: 0.75rem;
+}
+
+.dpi-help-title {
+    font-weight: 600;
+    color: #60a5fa;
+    margin-bottom: 0.5rem;
+    display: flex;
+    align-items: center;
+}
+
+.dpi-help-title svg {
+    margin-right: 0.5rem;
+}
+
+.dpi-help ul {
+    list-style: disc;
+    padding-left: 1.25rem;
+    margin: 0.5rem 0;
+}
+
+.dpi-help li {
+    margin: 0.25rem 0;
+}
+
+.dpi-help-recommendation {
+    color: #fbbf24;
+    margin-top: 0.5rem;
+}
+
+/* Custom dimensions inputs */
+.custom-dimensions {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1rem;
+}
+
+.custom-dimension-input {
+    width: 100%;
+    padding: 0.5rem 1rem;
+    background-color: #334155;
+    border: 1px solid #475569;
+    border-radius: 0.5rem;
+    color: white;
+    transition: all 0.2s ease-in-out;
+}
+
+.custom-dimension-input:focus {
+    outline: none;
+    border-color: #3b82f6;
+    ring: 2px;
+    ring-color: #3b82f6;
+}
+
+.custom-dimension-input::placeholder {
+    color: #64748b;
+}
+
+/* Output details info box */
+.output-info-box {
+    padding: 0.75rem;
+    background-color: rgba(51, 65, 85, 0.5);
+    border-radius: 0.5rem;
+    font-size: 0.875rem;
+    color: #d1d5db;
+    margin-top: 1rem;
+}
+
+.output-info-box svg {
+    flex-shrink: 0;
+}
+
+.output-info-content {
+    flex: 1;
+}
+
+.output-info-title {
+    font-weight: 600;
+    margin-bottom: 0.25rem;
+}
+
+/* Format info display */
+.format-info {
+    margin-top: 0.5rem;
+    font-size: 0.75rem;
+    color: #9ca3af;
+}
+
+/* Help button */
+.help-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    margin-left: 0.5rem;
+    color: #60a5fa;
+    transition: color 0.2s ease-in-out;
+}
+
+.help-button:hover {
+    color: #93c5fd;
+}
+
+.help-button svg {
+    width: 1rem;
+    height: 1rem;
+}
+
+/* Responsive design for mobile */
+@media (max-width: 768px) {
+    .dpi-selector {
+        grid-template-columns: 1fr;
+    }
+    
+    .custom-dimensions {
+        grid-template-columns: 1fr;
+    }
+    
+    .orientation-toggle {
+        flex-direction: column;
+    }
+    
+    .orientation-button {
+        width: 100%;
+    }
+}
+
+/* Smooth transitions for Alpine.js show/hide */
+[x-show] {
+    transition: all 0.3s ease-in-out;
+}
+
+/* Animation for collapsible sections */
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        max-height: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        max-height: 500px;
+        transform: translateY(0);
+    }
+}
+
+@keyframes slideUp {
+    from {
+        opacity: 1;
+        max-height: 500px;
+        transform: translateY(0);
+    }
+    to {
+        opacity: 0;
+        max-height: 0;
+        transform: translateY(-10px);
+    }
+}
+
+.slide-down {
+    animation: slideDown 0.3s ease-out;
+}
+
+.slide-up {
+    animation: slideUp 0.3s ease-out;
+}

@@ -20,7 +20,12 @@ class PosterService:
         latitude: float,
         longitude: float,
         preview_mode: bool = False,
-        session_id: Optional[str] = None
+        session_id: Optional[str] = None,
+        page_format: str = 'classic',
+        orientation: str = 'portrait',
+        dpi: int = 300,
+        custom_width_inches: Optional[float] = None,
+        custom_height_inches: Optional[float] = None
     ) -> Dict:
         """
         Create a new poster generation job.
@@ -34,6 +39,11 @@ class PosterService:
             longitude: Longitude coordinate
             preview_mode: Whether to generate preview (lower res)
             session_id: Session identifier for tracking
+            page_format: Page format identifier
+            orientation: Portrait or landscape
+            dpi: DPI resolution
+            custom_width_inches: Width for custom format
+            custom_height_inches: Height for custom format
             
         Returns:
             Dict with job_id, status, estimated_duration, etc.
@@ -49,6 +59,11 @@ class PosterService:
             longitude=longitude,
             preview_mode=preview_mode,
             session_id=session_id,
+            page_format=page_format,
+            orientation=orientation,
+            dpi=dpi,
+            custom_width_inches=custom_width_inches,
+            custom_height_inches=custom_height_inches,
             status=JobStatus.PENDING,
             created_at=datetime.utcnow()
         )
@@ -166,7 +181,12 @@ class PosterService:
         latitude: float,
         longitude: float,
         preview_mode: bool = False,
-        session_id: Optional[str] = None
+        session_id: Optional[str] = None,
+        page_format: str = 'classic',
+        orientation: str = 'portrait',
+        dpi: int = 300,
+        custom_width_inches: Optional[float] = None,
+        custom_height_inches: Optional[float] = None
     ) -> Dict:
         """
         Create a batch poster generation job for multiple themes.
@@ -180,6 +200,11 @@ class PosterService:
             longitude: Longitude coordinate
             preview_mode: Whether to generate preview (lower res)
             session_id: Session identifier for tracking
+            page_format: Page format identifier
+            orientation: Portrait or landscape
+            dpi: DPI resolution
+            custom_width_inches: Width for custom format
+            custom_height_inches: Height for custom format
             
         Returns:
             Dict with batch_id, job_ids, status, themes, etc.
@@ -201,6 +226,11 @@ class PosterService:
                 preview_mode=preview_mode,
                 session_id=session_id,
                 batch_id=batch_id,
+                page_format=page_format,
+                orientation=orientation,
+                dpi=dpi,
+                custom_width_inches=custom_width_inches,
+                custom_height_inches=custom_height_inches,
                 status=JobStatus.PENDING,
                 created_at=datetime.utcnow()
             )

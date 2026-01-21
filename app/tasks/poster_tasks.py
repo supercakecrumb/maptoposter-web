@@ -108,6 +108,20 @@ def register_tasks(celery_app):
         preview_mode = first_job.preview_mode
         session_id = first_job.session_id
         
+        # Get format parameters from first job
+        from app.utils.format_helpers import get_format_dimensions
+        
+        width_inches, height_inches = get_format_dimensions(
+            format_id=first_job.page_format,
+            orientation=first_job.orientation,
+            custom_width=first_job.custom_width_inches,
+            custom_height=first_job.custom_height_inches
+        )
+        
+        dpi = first_job.dpi
+        
+        current_app.logger.info(f"Batch format: {width_inches}\" × {height_inches}\" at {dpi} DPI")
+        
         # Extract theme list
         themes = [job.theme for job in jobs]
         
@@ -157,8 +171,8 @@ def register_tasks(celery_app):
                         current_app.logger.warning(f"Failed to generate thumbnail for {theme}: {e}")
                     
                     # Get image dimensions
-                    width = result.get('width', 3600)
-                    height = result.get('height', 4800)
+                    width = result.get('width', int(width_inches * dpi))
+                    height = result.get('height', int(height_inches * dpi))
                     
                     # Create poster record
                     poster = Poster(
@@ -175,6 +189,13 @@ def register_tasks(celery_app):
                         file_size=result['file_size'],
                         width=width,
                         height=height,
+                        width_inches=width_inches,
+                        height_inches=height_inches,
+                        page_format=job.page_format,
+                        orientation=job.orientation,
+                        dpi=dpi,
+                        custom_width_inches=job.custom_width_inches,
+                        custom_height_inches=job.custom_height_inches,
                         thumbnail_path=thumbnail_path,
                         session_id=session_id,
                         created_at=datetime.utcnow()
@@ -218,6 +239,9 @@ def register_tasks(celery_app):
                 themes=themes,
                 distance=distance,
                 preview_mode=preview_mode,
+                width_inches=width_inches,
+                height_inches=height_inches,
+                dpi=dpi,
                 progress_callback=None,  # Don't use batch-wide callback
                 job_progress_callback=job_progress_callback,  # Update individual jobs
                 result_callback=result_callback  # Process results immediately
@@ -337,6 +361,23 @@ def register_tasks(celery_app):
             
             map_data = fetch_map_data(point, job.distance, progress_callback=fetch_progress_callback)
             
+            # Step 4.5: Get dimensions from job format parameters
+            from app.utils.format_helpers import get_format_dimensions, calculate_output_dimensions
+            
+            width_inches, height_inches = get_format_dimensions(
+                format_id=job.page_format,
+                orientation=job.orientation,
+                custom_width=job.custom_width_inches,
+                custom_height=job.custom_height_inches
+            )
+            
+            # Calculate output pixel dimensions
+            width_px, height_px = calculate_output_dimensions(
+                width_inches, height_inches, job.dpi
+            )
+            
+            current_app.logger.info(f"Poster dimensions: {width_inches}\" × {height_inches}\" at {job.dpi} DPI = {width_px}×{height_px} pixels")
+            
             # Step 5: Render poster (60-90%) with detailed callbacks
             def render_progress_callback(stage):
                 """Handle progress from render_poster"""
@@ -360,7 +401,9 @@ def register_tasks(celery_app):
                 country=job.country,
                 point=point,
                 output_file=output_file,
-                preview_mode=job.preview_mode,
+                width_inches=width_inches,
+                height_inches=height_inches,
+                dpi=job.dpi,
                 progress_callback=render_progress_callback
             )
             
@@ -374,13 +417,9 @@ def register_tasks(celery_app):
             # Get file info
             file_size = os.path.getsize(absolute_path)
             
-            # Determine dimensions based on preview mode
-            if job.preview_mode:
-                width = 1800   # 12 inches * 150 DPI
-                height = 2400  # 16 inches * 150 DPI
-            else:
-                width = 3600   # 12 inches * 300 DPI
-                height = 4800  # 16 inches * 300 DPI
+            # Use calculated dimensions
+            width = width_px
+            height = height_px
             
             # Step 7: Generate thumbnail (90-95%)
             progress_callback("Generating thumbnail...", 95)
@@ -419,6 +458,13 @@ def register_tasks(celery_app):
                 file_size=result['file_size'],
                 width=result['width'],
                 height=result['height'],
+                width_inches=width_inches,
+                height_inches=height_inches,
+                page_format=job.page_format,
+                orientation=job.orientation,
+                dpi=job.dpi,
+                custom_width_inches=job.custom_width_inches,
+                custom_height_inches=job.custom_height_inches,
                 thumbnail_path=result.get('thumbnail_path'),
                 session_id=job.session_id,
                 created_at=datetime.utcnow()
