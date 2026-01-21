@@ -1,0 +1,34 @@
+# Additional dependencies for Flask web application
+# Install with: pip install -r requirements-web.txt
+
+# Existing CLI dependencies are in requirements.txt
+# This file contains only additional web-specific dependencies
+
+# Flask and extensions
+Flask==3.0.0
+Flask-SQLAlchemy==3.1.1
+Flask-Caching==2.1.0
+Werkzeug==3.0.1
+
+# Celery for background tasks
+celery==5.3.4
+
+# Redis
+redis==5.0.1
+
+# Database
+SQLAlchemy==2.0.23
+
+# Environment variables
+python-dotenv==1.0.0
+
+# Image processing for thumbnails
+Pillow>=9.0.0
+
+# Geopy (already in requirements.txt but included for completeness)
+# geopy==2.4.1
+
+# Note: Install base requirements first with:
+# pip install -r requirements.txt
+# Then install web requirements with:
+# pip install -r requirements-web.txt

@@ -1,0 +1,61 @@
+{% extends "base.html" %}
+
+{% block title %}Gallery - City Map Poster Generator{% endblock %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+    <div class="mb-8">
+        <h1 class="text-4xl font-bold text-white mb-2">Your Posters</h1>
+        <p class="text-gray-400">View and manage your generated map posters</p>
+    </div>
+    
+    {% if posters %}
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+        {% for poster in posters %}
+        <div class="bg-slate-800 border border-slate-700 rounded-lg shadow-lg overflow-hidden hover:shadow-xl transition">
+            <a href="{{ url_for('web.poster_detail', poster_id=poster.id) }}">
+                <div class="aspect-[3/4] bg-slate-700 overflow-hidden">
+                    <img
+                        src="{{ url_for('api_v1.get_poster_image', poster_id=poster.id) }}"
+                        alt="{{ poster.city }}, {{ poster.country }}"
+                        class="w-full h-full object-cover"
+                        loading="lazy"
+                    >
+                </div>
+                <div class="p-4">
+                    <h3 class="font-bold text-white mb-1">{{ poster.city }}</h3>
+                    <p class="text-sm text-gray-400 mb-2">{{ poster.theme }}</p>
+                    <div class="flex justify-between items-center text-xs text-gray-400">
+                        <span>{{ poster.created_at.strftime('%Y-%m-%d') }}</span>
+                        <span>{{ (poster.file_size / 1024 / 1024)|round(1) }} MB</span>
+                    </div>
+                </div>
+            </a>
+            <div class="px-4 pb-4 pt-0">
+                <a 
+                    href="{{ url_for('api_v1.download_poster', poster_id=poster.id) }}"
+                    class="block w-full bg-blue-600 text-white text-center text-sm font-semibold py-2 rounded-lg hover:bg-blue-700 transition"
+                >
+                    Download
+                </a>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="text-center py-16">
+        <svg class="w-24 h-24 mx-auto text-slate-600 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path>
+        </svg>
+        <h2 class="text-2xl font-bold text-white mb-2">No Posters Yet</h2>
+        <p class="text-gray-400 mb-6">Create your first map poster to see it here</p>
+        <a
+            href="{{ url_for('web.create') }}"
+            class="inline-block bg-blue-600 text-white font-semibold py-3 px-8 rounded-lg hover:bg-blue-700 transition"
+        >
+            Create Your First Poster
+        </a>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

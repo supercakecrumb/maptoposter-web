@@ -1,0 +1,113 @@
+{% extends "base.html" %}
+
+{% block title %}Home - City Map Poster Generator{% endblock %}
+
+{% block content %}
+<div class="bg-gradient-to-br from-slate-800 to-slate-900 py-20">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="text-center">
+            <h1 class="text-5xl font-bold text-white mb-4">
+                Create Beautiful Map Posters
+            </h1>
+            <p class="text-xl text-gray-300 mb-8">
+                Transform any city into stunning wall art with our custom map poster generator
+            </p>
+        </div>
+        
+        <!-- Quick Create Form -->
+        <div class="max-w-2xl mx-auto bg-slate-800 rounded-lg shadow-lg p-8 border border-slate-700" x-data="quickCreate()">
+            <h2 class="text-2xl font-bold text-white mb-6 text-center">Quick Create</h2>
+            
+            <form @submit.prevent="createPoster()" class="space-y-4">
+                <div class="relative">
+                    <label class="block text-sm font-medium text-gray-300 mb-2">Location</label>
+                    <input
+                        type="text"
+                        x-model="form.location"
+                        @input="searchLocation()"
+                        @focus="showSuggestions = true"
+                        @blur="setTimeout(() => showSuggestions = false, 200)"
+                        class="w-full px-4 py-2 bg-slate-700 border border-slate-600 text-white rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        placeholder="e.g., Paris, France or New York, USA"
+                        required
+                    >
+                    <!-- Autocomplete Dropdown -->
+                    <div
+                        x-show="showSuggestions && suggestions.length > 0"
+                        class="absolute z-10 w-full mt-1 bg-slate-700 border border-slate-600 rounded-lg shadow-lg max-h-60 overflow-y-auto"
+                    >
+                        <template x-for="suggestion in suggestions" :key="suggestion.place_id">
+                            <div
+                                @click="selectLocation(suggestion)"
+                                class="px-4 py-2 hover:bg-slate-600 cursor-pointer text-white text-sm"
+                                x-text="suggestion.display_name"
+                            ></div>
+                        </template>
+                    </div>
+                </div>
+                
+                <div>
+                    <label class="block text-sm font-medium text-gray-300 mb-2">Theme</label>
+                    <select
+                        x-model="form.theme"
+                        class="w-full px-4 py-2 bg-slate-700 border border-slate-600 text-white rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    >
+                        {% for theme in themes %}
+                        <option value="{{ theme.id }}">{{ theme.name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                
+                <div class="pt-4">
+                    <button 
+                        type="submit"
+                        :disabled="loading"
+                        class="w-full bg-blue-600 text-white font-semibold py-3 px-6 rounded-lg hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition duration-200"
+                    >
+                        <span x-show="!loading">Create Poster</span>
+                        <span x-show="loading">Creating...</span>
+                    </button>
+                </div>
+                
+                <div class="text-center">
+                    <a href="{{ url_for('web.create') }}" class="text-sm text-blue-600 hover:underline">
+                        Advanced options →
+                    </a>
+                </div>
+            </form>
+            
+            <!-- Error message -->
+            <div x-show="error" class="mt-4 p-4 bg-red-900 border border-red-700 rounded-lg">
+                <p class="text-red-200 text-sm" x-text="error"></p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Features Section -->
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+    <h2 class="text-3xl font-bold text-center text-white mb-12">Featured Themes</h2>
+    <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-6">
+        {% for theme in themes %}
+        <div class="bg-slate-800 border border-slate-700 rounded-lg shadow hover:shadow-lg transition duration-200">
+            <div class="aspect-[3/4] bg-slate-700 rounded-t-lg overflow-hidden">
+                <img
+                    src="{{ theme.preview_url }}"
+                    alt="{{ theme.name }} theme preview"
+                    class="w-full h-full object-cover"
+                    loading="lazy"
+                >
+            </div>
+            <div class="p-3 text-center">
+                <p class="font-medium text-white">{{ theme.name }}</p>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    <div class="text-center mt-8">
+        <a href="{{ url_for('web.themes') }}" class="text-blue-400 hover:underline font-medium">
+            View all {{ themes|length }} themes →
+        </a>
+    </div>
+</div>
+{% endblock %}

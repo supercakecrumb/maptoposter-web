@@ -1,0 +1,133 @@
+# Docker Compose development override configuration
+# Use with: docker-compose -f docker-compose.yml -f docker-compose.dev.yml up
+# 
+# This file provides development-specific settings:
+# - Source code mounting for hot reloading
+# - Flask development server instead of gunicorn
+# - Debug mode enabled
+# - Simplified setup without PostgreSQL (uses SQLite)
+
+version: '3.8'
+
+services:
+  # ============================================================================
+  # Flask Web Application - Development Configuration
+  # ============================================================================
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: builder  # Use builder stage for development tools
+    environment:
+      # Enable debug mode
+      FLASK_ENV: development
+      FLASK_DEBUG: 1
+      
+      # Use SQLite for simpler development setup
+      DATABASE_URL: sqlite:///instance/posters.db
+      
+      # Redis still used for caching and Celery
+      REDIS_URL: redis://redis:6379/0
+      CELERY_BROKER_URL: redis://redis:6379/1
+      CELERY_RESULT_BACKEND: redis://redis:6379/2
+    
+    # Mount source code for hot reloading
+    volumes:
+      # Application code - mounted for live editing
+      - ./app:/app/app:rw
+      - ./run.py:/app/run.py:rw
+      - ./celery_worker.py:/app/celery_worker.py:rw
+      
+      # Configuration files
+      - ./.env:/app/.env:ro
+      
+      # Static assets and templates (for live updates)
+      - ./app/static:/app/app/static:rw
+      - ./app/templates:/app/app/templates:rw
+      
+      # Persistent data directories
+      - ./posters:/app/posters:rw
+      - ./thumbnails:/app/thumbnails:rw
+      - ./temp:/app/temp:rw
+      - ./instance:/app/instance:rw
+      
+      # Fonts and themes
+      - ./fonts:/app/fonts:ro
+      - ./themes:/app/themes:ro
+    
+    # Override command to use Flask development server
+    command: python run.py
+    
+    # Expose additional port for debugging (if needed)
+    ports:
+      - "5000:5000"
+      - "5678:5678"  # Debug port for debugpy or similar tools
+    
+    # Remove resource limits in development
+    deploy:
+      resources:
+        limits:
+          cpus: '4'
+          memory: 4G
+
+  # ============================================================================
+  # Celery Worker - Development Configuration
+  # ============================================================================
+  celery:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: builder
+    environment:
+      FLASK_ENV: development
+      FLASK_DEBUG: 1
+      DATABASE_URL: sqlite:///instance/posters.db
+      REDIS_URL: redis://redis:6379/0
+      CELERY_BROKER_URL: redis://redis:6379/1
+      CELERY_RESULT_BACKEND: redis://redis:6379/2
+    
+    # Mount source code for hot reloading
+    volumes:
+      # Application code
+      - ./app:/app/app:rw
+      - ./celery_worker.py:/app/celery_worker.py:rw
+      
+      # Configuration
+      - ./.env:/app/.env:ro
+      
+      # Shared data directories
+      - ./posters:/app/posters:rw
+      - ./thumbnails:/app/thumbnails:rw
+      - ./temp:/app/temp:rw
+      - ./instance:/app/instance:rw
+      
+      # Fonts and themes
+      - ./fonts:/app/fonts:ro
+      - ./themes:/app/themes:ro
+    
+    # Use watchdog for auto-reloading on code changes
+    command: >
+      celery -A celery_worker.celery worker 
+      --loglevel=debug 
+      --concurrency=1 
+      --max-tasks-per-child=10
+    
+    # Remove resource limits in development
+    deploy:
+      resources:
+        limits:
+          cpus: '4'
+          memory: 4G
+
+  # ============================================================================
+  # Redis - Development Configuration
+  # ============================================================================
+  redis:
+    # Expose Redis port for debugging with redis-cli from host
+    ports:
+      - "6379:6379"
+
+# Note: PostgreSQL service is not started in development mode
+# The web and celery services use SQLite instead for simplicity
+# If you need PostgreSQL in development, you can still start it with:
+# docker-compose -f docker-compose.yml -f docker-compose.dev.yml up postgres

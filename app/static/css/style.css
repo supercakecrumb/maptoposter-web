@@ -1,0 +1,281 @@
+/**
+ * Custom styles for City Map Poster Generator
+ * Tailwind CSS is used via CDN for base styling
+ */
+
+/* Dark theme base */
+body {
+    background-color: #0f172a; /* slate-900 */
+    color: #f1f5f9; /* slate-100 */
+}
+
+/* Card styles */
+.card {
+    background-color: #1e293b; /* slate-800 */
+    border-color: #334155; /* slate-700 */
+}
+
+/* Input styles for dark theme */
+input, select, textarea {
+    background-color: #1e293b;
+    border-color: #475569;
+    color: #f1f5f9;
+}
+
+input::placeholder {
+    color: #64748b;
+}
+
+/* Autocomplete dropdown */
+.autocomplete-dropdown {
+    background-color: #1e293b;
+    border-color: #475569;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3), 0 2px 4px -1px rgba(0, 0, 0, 0.2);
+}
+
+.autocomplete-item {
+    color: #f1f5f9;
+}
+
+.autocomplete-item:hover {
+    background-color: #334155;
+}
+
+/* Custom range slider styling */
+input[type="range"] {
+    -webkit-appearance: none;
+    appearance: none;
+    background: transparent;
+    cursor: pointer;
+}
+
+input[type="range"]::-webkit-slider-track {
+    background-color: #e5e7eb;
+    border-radius: 0.5rem;
+    height: 0.5rem;
+}
+
+input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    background-color: #2563eb;
+    border-radius: 50%;
+    height: 1.25rem;
+    width: 1.25rem;
+    margin-top: -0.375rem;
+}
+
+input[type="range"]::-moz-range-track {
+    background-color: #e5e7eb;
+    border-radius: 0.5rem;
+    height: 0.5rem;
+}
+
+input[type="range"]::-moz-range-thumb {
+    background-color: #2563eb;
+    border: none;
+    border-radius: 50%;
+    height: 1.25rem;
+    width: 1.25rem;
+}
+
+input[type="range"]:focus {
+    outline: none;
+}
+
+input[type="range"]:focus::-webkit-slider-thumb {
+    outline: 2px solid #2563eb;
+    outline-offset: 2px;
+}
+
+/* Smooth transitions for Alpine.js */
+[x-cloak] {
+    display: none !important;
+}
+
+/* Progress bar animation */
+@keyframes pulse {
+    0%, 100% {
+        opacity: 1;
+    }
+    50% {
+        opacity: .5;
+    }
+}
+
+.animate-pulse-slow {
+    animation: pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+/* Loading spinner */
+.spinner {
+    border: 3px solid rgba(255, 255, 255, 0.3);
+    border-radius: 50%;
+    border-top: 3px solid white;
+    width: 20px;
+    height: 20px;
+    animation: spin 1s linear infinite;
+    display: inline-block;
+    margin-left: 8px;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* Theme card hover effect */
+.theme-card {
+    transition: all 0.2s ease-in-out;
+}
+
+.theme-card:hover {
+    transform: translateY(-4px);
+}
+
+/* Multi-select theme card styles */
+.theme-card-selected {
+    border-color: #4CAF50 !important;
+    box-shadow: 0 0 0 3px rgba(76, 175, 80, 0.3), 0 4px 6px -1px rgba(0, 0, 0, 0.3);
+}
+
+.selection-indicator {
+    animation: checkmark-pop 0.3s ease-out;
+}
+
+@keyframes checkmark-pop {
+    0% {
+        transform: scale(0);
+        opacity: 0;
+    }
+    50% {
+        transform: scale(1.2);
+    }
+    100% {
+        transform: scale(1);
+        opacity: 1;
+    }
+}
+
+/* Theme selection controls */
+.theme-selection-controls {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.theme-selection-controls button {
+    transition: all 0.2s ease-in-out;
+}
+
+.theme-selection-controls button:hover {
+    transform: translateY(-1px);
+}
+
+/* Custom scrollbar for modern browsers */
+::-webkit-scrollbar {
+    width: 10px;
+}
+
+::-webkit-scrollbar-track {
+    background: #f1f1f1;
+}
+
+::-webkit-scrollbar-thumb {
+    background: #888;
+    border-radius: 5px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: #555;
+}
+
+/* Batch progress styles */
+.batch-progress-container {
+    display: grid;
+    gap: 1rem;
+}
+
+.batch-job-card {
+    background-color: #1e293b;
+    border: 1px solid #334155;
+    border-radius: 0.5rem;
+    padding: 1rem;
+    transition: all 0.3s ease;
+}
+
+.batch-job-card.completed {
+    border-color: #4CAF50;
+    background-color: rgba(76, 175, 80, 0.1);
+}
+
+.batch-job-card.failed {
+    border-color: #ef4444;
+    background-color: rgba(239, 68, 68, 0.1);
+}
+
+.batch-job-card.processing {
+    border-color: #3b82f6;
+    background-color: rgba(59, 130, 246, 0.1);
+}
+
+.batch-progress-bar {
+    width: 100%;
+    height: 8px;
+    background-color: #334155;
+    border-radius: 4px;
+    overflow: hidden;
+    margin-top: 0.5rem;
+}
+
+.batch-progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #3b82f6, #2563eb);
+    transition: width 0.5s ease;
+    border-radius: 4px;
+}
+
+.batch-job-thumbnail {
+    width: 100%;
+    max-width: 200px;
+    height: auto;
+    border-radius: 0.5rem;
+    border: 2px solid #334155;
+    transition: transform 0.2s ease;
+}
+
+.batch-job-thumbnail:hover {
+    transform: scale(1.05);
+    border-color: #3b82f6;
+}
+
+/* Status badges */
+.status-badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.25rem 0.75rem;
+    border-radius: 9999px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+}
+
+.status-badge.pending {
+    background-color: rgba(156, 163, 175, 0.2);
+    color: #9ca3af;
+}
+
+.status-badge.processing {
+    background-color: rgba(59, 130, 246, 0.2);
+    color: #3b82f6;
+}
+
+.status-badge.completed {
+    background-color: rgba(76, 175, 80, 0.2);
+    color: #4CAF50;
+}
+
+.status-badge.failed {
+    background-color: rgba(239, 68, 68, 0.2);
+    color: #ef4444;
+}

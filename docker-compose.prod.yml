@@ -1,0 +1,68 @@
+# Docker Compose production configuration with Nginx reverse proxy
+# Use with: docker-compose -f docker-compose.yml -f docker-compose.prod.yml up -d
+
+version: '3.8'
+
+services:
+  # ============================================================================
+  # Nginx Reverse Proxy
+  # ============================================================================
+  nginx:
+    image: nginx:1.25-alpine
+    container_name: maptoposter-nginx
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      # Nginx configuration
+      - ./docker/nginx.conf:/etc/nginx/conf.d/default.conf:ro
+      
+      # SSL certificates (mount your actual certificates here)
+      # - ./docker/ssl:/etc/nginx/ssl:ro
+      
+      # Static files from web container
+      - ./app/static:/app/app/static:ro
+      
+      # Generated posters
+      - poster_data:/app/posters:ro
+      - thumbnail_data:/app/thumbnails:ro
+      
+      # Let's Encrypt challenge directory
+      - ./docker/certbot:/var/www/certbot:ro
+    depends_on:
+      - web
+    restart: unless-stopped
+    networks:
+      - maptoposter-net
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost/api/v1/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # ============================================================================
+  # Web service updates for production
+  # ============================================================================
+  web:
+    # Don't expose port directly - Nginx handles it
+    ports: []
+    
+    # Add entrypoint script
+    entrypoint: ["/app/docker/entrypoint.sh"]
+    command: ["gunicorn", "--bind", "0.0.0.0:5000", "--workers", "4", "--timeout", "300", "--access-logfile", "-", "--error-logfile", "-", "run:app"]
+
+  # ============================================================================
+  # Celery service updates for production
+  # ============================================================================
+  celery:
+    # Add entrypoint script
+    entrypoint: ["/app/docker/entrypoint.sh"]
+    command: ["celery", "-A", "celery_worker.celery", "worker", "--loglevel=info", "--concurrency=2", "--max-tasks-per-child=50"]
+
+# Volumes are inherited from docker-compose.yml
+volumes:
+  poster_data:
+  thumbnail_data:
+
+networks:
+  maptoposter-net:

@@ -1,0 +1,80 @@
+{% extends "base.html" %}
+
+{% block title %}{{ poster.city }} Poster - City Map Poster Generator{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+    <div class="mb-6">
+        <a href="{{ url_for('web.gallery') }}" class="text-blue-400 hover:underline text-sm">
+            ← Back to Gallery
+        </a>
+    </div>
+    
+    <div class="bg-slate-800 border border-slate-700 rounded-lg shadow-lg overflow-hidden">
+        <!-- Poster Preview -->
+        <div class="aspect-[3/4] bg-slate-700 overflow-hidden">
+            <img
+                src="{{ url_for('api_v1.get_poster_image', poster_id=poster.id) }}"
+                alt="{{ poster.city }}, {{ poster.country }}"
+                class="w-full h-full object-contain"
+            >
+        </div>
+        
+        <!-- Poster Details -->
+        <div class="p-6">
+            <h1 class="text-3xl font-bold text-white mb-4">{{ poster.city }}, {{ poster.country }}</h1>
+            
+            <div class="grid grid-cols-2 gap-4 mb-6">
+                <div>
+                    <p class="text-sm text-gray-400">Theme</p>
+                    <p class="font-medium text-white">{{ poster.theme }}</p>
+                </div>
+                <div>
+                    <p class="text-sm text-gray-400">Radius</p>
+                    <p class="font-medium text-white">{{ (poster.distance / 1000)|round(1) }} km</p>
+                </div>
+                <div>
+                    <p class="text-sm text-gray-400">Dimensions</p>
+                    <p class="font-medium text-white">{{ poster.width }} × {{ poster.height }} px</p>
+                </div>
+                <div>
+                    <p class="text-sm text-gray-400">File Size</p>
+                    <p class="font-medium text-white">{{ (poster.file_size / 1024 / 1024)|round(2) }} MB</p>
+                </div>
+                <div>
+                    <p class="text-sm text-gray-400">Created</p>
+                    <p class="font-medium text-white">{{ poster.created_at.strftime('%Y-%m-%d %H:%M') }}</p>
+                </div>
+                <div>
+                    <p class="text-sm text-gray-400">Downloads</p>
+                    <p class="font-medium text-white">{{ poster.download_count }}</p>
+                </div>
+            </div>
+            
+            <!-- Actions -->
+            <div class="flex gap-4">
+                <a 
+                    href="{{ url_for('api_v1.download_poster', poster_id=poster.id) }}"
+                    class="flex-1 bg-blue-600 text-white text-center font-semibold py-3 px-6 rounded-lg hover:bg-blue-700 transition"
+                >
+                    Download Poster
+                </a>
+                <a
+                    href="{{ url_for('web.create', city=poster.city, country=poster.country, distance=poster.distance, theme=poster.theme) }}"
+                    class="px-6 py-3 border border-slate-600 rounded-lg text-gray-300 hover:bg-slate-700 transition"
+                >
+                    Create Another
+                </a>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Coordinates -->
+    <div class="mt-6 bg-slate-800 border border-slate-700 rounded-lg p-4">
+        <p class="text-sm text-gray-400">
+            <span class="font-medium">Coordinates:</span>
+            {{ poster.latitude|round(4) }}°, {{ poster.longitude|round(4) }}°
+        </p>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+
+{% block title %}Themes - City Map Poster Generator{% endblock %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+    <div class="mb-8">
+        <h1 class="text-4xl font-bold text-white mb-2">Theme Gallery</h1>
+        <p class="text-gray-400">Browse all {{ themes|length }} available themes for your map posters</p>
+    </div>
+    
+    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
+        {% for theme in themes %}
+        <div class="bg-slate-800 border border-slate-700 rounded-lg shadow hover:shadow-lg transition">
+            <div class="aspect-[3/4] bg-slate-700 overflow-hidden rounded-t-lg">
+                <img
+                    src="{{ theme.preview_url }}"
+                    alt="{{ theme.name }} preview"
+                    class="w-full h-full object-cover"
+                    onerror="this.onerror=null; this.parentElement.innerHTML='<div class=\'flex items-center justify-center h-full\'><span class=\'text-xs text-gray-500\'>Preview not available</span></div>';"
+                />
+            </div>
+            <div class="p-4">
+                <h3 class="font-bold text-white mb-1">{{ theme.name }}</h3>
+                {% if theme.description %}
+                <p class="text-xs text-gray-400 mb-3">{{ theme.description }}</p>
+                {% endif %}
+                <a
+                    href="{{ url_for('web.create') }}?theme={{ theme.id }}"
+                    class="block w-full text-center bg-blue-600 text-white text-sm font-semibold py-2 rounded-lg hover:bg-blue-700 transition"
+                >
+                    Use Theme
+                </a>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

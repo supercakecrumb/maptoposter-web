@@ -1,0 +1,45 @@
+============================================================
+City Map Poster Generator - Celery Worker
+============================================================
+Starting Celery worker...
+Broker: redis://localhost:6379/1
+Backend: redis://localhost:6379/2
+============================================================
+ 
+ -------------- celery@i115330552 v5.3.4 (emerald-rush)
+--- ***** ----- 
+-- ******* ---- macOS-15.7.3-arm64-arm-64bit-Mach-O 2026-01-21 10:17:37
+- *** --- * --- 
+- ** ---------- [config]
+- ** ---------- .> app:         app:0x105d51fd0
+- ** ---------- .> transport:   redis://localhost:6379/1
+- ** ---------- .> results:     redis://localhost:6379/2
+- *** --- * --- .> concurrency: 2 (prefork)
+-- ******* ---- .> task events: OFF (enable -E to monitor tasks in this worker)
+--- ***** ----- 
+ -------------- [queues]
+                .> celery           exchange=celery(direct) key=celery
+                
+
+[tasks]
+  . app.tasks.generate_batch_posters
+  . app.tasks.generate_poster
+
+[2026-01-21 10:17:37,381: WARNING/MainProcess] /Users/val-kiel/Personal/Fun/maptoposter-web/venv/lib/python3.13/site-packages/celery/worker/consumer/consumer.py:507: CPendingDeprecationWarning: The broker_connection_retry configuration setting will no longer determine
+whether broker connection retries are made during startup in Celery 6.0 and above.
+If you wish to retain the existing behavior for retrying connections on startup,
+you should set broker_connection_retry_on_startup to True.
+  warnings.warn(
+
+[2026-01-21 10:17:37,389: WARNING/MainProcess] /Users/val-kiel/Personal/Fun/maptoposter-web/venv/lib/python3.13/site-packages/celery/worker/consumer/consumer.py:507: CPendingDeprecationWarning: The broker_connection_retry configuration setting will no longer determine
+whether broker connection retries are made during startup in Celery 6.0 and above.
+If you wish to retain the existing behavior for retrying connections on startup,
+you should set broker_connection_retry_on_startup to True.
+  warnings.warn(
+
+
+worker: Hitting Ctrl+C again will terminate all running tasks!
+
+worker: Warm shutdown (MainProcess)
+
+worker: Warm shutdown (MainProcess)

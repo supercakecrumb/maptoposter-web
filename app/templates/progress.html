@@ -1,0 +1,137 @@
+{% extends "base.html" %}
+
+{% block title %}Generating Poster - City Map Poster Generator{% endblock %}
+
+{% block content %}
+<div class="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+    <div x-data="jobMonitor('{{ job_id }}')" x-init="startPolling()">
+        <!-- Progress Header -->
+        <div class="text-center mb-8">
+            <h1 class="text-3xl font-bold text-white mb-2">Creating Your Poster</h1>
+            <p class="text-gray-400" x-text="status.current_step || 'Preparing...'"></p>
+        </div>
+        
+        <!-- Detailed Progress Steps -->
+        <div class="mb-8 bg-slate-800 border border-slate-700 rounded-lg shadow-lg p-6">
+            <div class="space-y-3">
+                <template x-for="(step, index) in (status.progress_steps || [])" :key="index">
+                    <div class="flex items-start gap-3">
+                        <div class="flex-shrink-0 mt-1">
+                            <span
+                                x-show="step.status === 'completed'"
+                                class="text-green-400 text-lg"
+                            >✓</span>
+                            <span
+                                x-show="step.status === 'in_progress'"
+                                class="text-blue-400 text-lg"
+                            >→</span>
+                            <span
+                                x-show="step.status === 'pending'"
+                                class="text-gray-500 text-lg"
+                            >○</span>
+                        </div>
+                        <div class="flex-1">
+                            <p
+                                class="text-sm"
+                                :class="{
+                                    'text-white': step.status === 'in_progress',
+                                    'text-gray-400': step.status === 'completed',
+                                    'text-gray-600': step.status === 'pending'
+                                }"
+                                x-text="step.step"
+                            ></p>
+                        </div>
+                    </div>
+                </template>
+                
+                <!-- Show placeholder if no steps yet -->
+                <div x-show="!status.progress_steps || status.progress_steps.length === 0" class="text-center text-gray-500 py-4">
+                    <p>Initializing...</p>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Progress Bar -->
+        <div class="mb-8">
+            <div class="bg-slate-700 rounded-full h-6 overflow-hidden shadow-inner">
+                <div
+                    class="bg-blue-600 h-full transition-all duration-500 ease-out flex items-center justify-end pr-2"
+                    :style="`width: ${status.progress || 0}%`"
+                >
+                    <span class="text-white text-xs font-semibold" x-show="status.progress > 5" x-text="`${status.progress}%`"></span>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Status Card -->
+        <div class="bg-slate-800 border border-slate-700 rounded-lg shadow-lg p-6 mb-6">
+            <div class="grid grid-cols-2 gap-4">
+                <div>
+                    <p class="text-sm text-gray-400">City</p>
+                    <p class="font-medium text-white" x-text="status.city || '-'"></p>
+                </div>
+                <div>
+                    <p class="text-sm text-gray-400">Theme</p>
+                    <p class="font-medium text-white" x-text="status.theme || '-'"></p>
+                </div>
+                <div>
+                    <p class="text-sm text-gray-400">Status</p>
+                    <p class="font-medium text-white capitalize" x-text="status.status || 'pending'"></p>
+                </div>
+                <div>
+                    <p class="text-sm text-gray-400">Time Elapsed</p>
+                    <p class="font-medium text-white" x-text="elapsedTime"></p>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Actions -->
+        <div class="flex justify-center">
+            <button
+                @click="cancelJob()"
+                x-show="status.status === 'processing' || status.status === 'pending'"
+                class="px-6 py-2 border border-red-600 text-red-400 rounded-lg hover:bg-red-900 transition"
+            >
+                Cancel Generation
+            </button>
+        </div>
+        
+        <!-- Success Modal (Hidden - auto-redirect on completion) -->
+        <div
+            x-show="false"
+            class="hidden"
+        >
+        </div>
+        
+        <!-- Error Display -->
+        <div 
+            x-show="status.status === 'failed'"
+            class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
+            x-transition
+        >
+            <div class="bg-white rounded-lg p-8 max-w-md w-full mx-4">
+                <div class="text-center mb-6">
+                    <div class="text-6xl mb-4">😞</div>
+                    <h3 class="text-2xl font-bold text-gray-900 mb-2">Generation Failed</h3>
+                    <p class="text-gray-600 text-sm" x-text="status.error_message"></p>
+                </div>
+                
+                <div class="space-y-3">
+                    <a 
+                        href="{{ url_for('web.create') }}"
+                        class="block w-full bg-blue-600 text-white text-center py-3 px-4 rounded-lg hover:bg-blue-700 font-semibold transition"
+                    >
+                        Try Again
+                    </a>
+                    <a
+                        href="{{ url_for('web.index') }}"
+                        class="block w-full text-gray-400 text-center py-2 hover:text-gray-300 transition"
+                    >
+                        Go Home
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

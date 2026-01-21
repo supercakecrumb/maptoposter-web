@@ -84,6 +84,96 @@ python create_map_poster.py --list-themes
 | 8000-12000m | Medium cities, focused downtown (Paris, Barcelona) |
 | 15000-20000m | Large metros, full city view (Tokyo, Mumbai) |
 
+## Web Application
+
+The City Map Poster Generator now includes a full-featured web application for easy browser-based poster generation!
+
+### Quick Start with Docker
+
+The fastest way to get started:
+
+```bash
+# 1. Copy environment configuration
+cp .env.docker .env
+
+# 2. Start all services
+docker-compose up -d
+
+# 3. Open in browser
+open http://localhost:5000
+```
+
+### Quick Start (Local Development)
+
+```bash
+# 1. Install dependencies
+pip install -r requirements.txt requirements-web.txt
+
+# 2. Start Redis (in separate terminal)
+redis-server
+
+# 3. Start web server (in separate terminal)
+python run.py
+
+# 4. Start Celery worker (in separate terminal)
+python celery_worker.py
+
+# 5. Access at http://localhost:5000
+```
+
+### Web Features
+
+- **Browser-based interface** - No command line needed
+- **Real-time progress tracking** - Watch your poster being generated
+- **Session-based gallery** - View and download all your posters
+- **Theme browser** - Preview all 17 themes before generating
+- **REST API** - Programmatic access for integration
+- **Background processing** - Powered by Celery + Redis
+- **Production ready** - Docker deployment with PostgreSQL and Nginx
+
+### Web Application Routes
+
+- `/` - Homepage with quick create form
+- `/create` - Full poster creation wizard
+- `/themes` - Browse all available themes
+- `/gallery` - View your generated posters
+- `/progress/{job_id}` - Real-time generation progress
+- `/api/v1/*` - REST API endpoints
+
+### REST API
+
+Create posters programmatically:
+
+```python
+import requests
+
+# Create poster
+response = requests.post('http://localhost:5000/api/v1/posters', json={
+    'city': 'Paris',
+    'country': 'France',
+    'theme': 'noir',
+    'distance': 12000
+})
+
+job = response.json()
+print(f"Job ID: {job['job_id']}")
+
+# Check status
+status = requests.get(f"http://localhost:5000/api/v1/jobs/{job['job_id']}")
+print(status.json())
+```
+
+See [`docs/API_REFERENCE.md`](docs/API_REFERENCE.md#rest-api-endpoints) for complete API documentation.
+
+### Documentation
+
+- **[WEB_README.md](WEB_README.md)** - Web application setup and usage
+- **[DOCKER_README.md](DOCKER_README.md)** - Docker deployment guide  
+- **[docs/WEB_ARCHITECTURE.md](docs/WEB_ARCHITECTURE.md)** - Technical architecture
+- **[docs/DEPLOYMENT_GUIDE.md](docs/DEPLOYMENT_GUIDE.md)** - Complete deployment guide
+- **[docs/API_REFERENCE.md](docs/API_REFERENCE.md)** - REST API reference
+
+
 ## Themes
 
 17 themes available in `themes/` directory:
