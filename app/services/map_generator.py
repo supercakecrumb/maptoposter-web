@@ -59,13 +59,14 @@ def load_fonts():
 FONTS = load_fonts()
 
 
-def generate_output_filename(city: str, theme_name: str) -> str:
+def generate_output_filename(city: str, theme_name: str, extension: str = 'png') -> str:
     """
     Generate unique output filename with city, theme, and datetime.
     
     Args:
         city: City name
         theme_name: Theme name
+        extension: File extension ('png' or 'pdf', default 'png')
         
     Returns:
         Full path to output file
@@ -75,7 +76,7 @@ def generate_output_filename(city: str, theme_name: str) -> str:
     
     timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
     city_slug = city.lower().replace(' ', '_')
-    filename = f"{city_slug}_{theme_name}_{timestamp}.png"
+    filename = f"{city_slug}_{theme_name}_{timestamp}.{extension}"
     return os.path.join(POSTERS_DIR, filename)
 
 
@@ -448,7 +449,8 @@ def fetch_map_data(point: Tuple[float, float], distance: int,
 def render_poster(map_data: Dict, theme: Dict, city: str, country: str,
                  point: Tuple[float, float], output_file: str,
                  width_inches: float, height_inches: float, dpi: int,
-                 progress_callback: Optional[Callable] = None):
+                 progress_callback: Optional[Callable] = None,
+                 output_format: str = 'png'):
     """
     Render a map poster using pre-fetched map data.
     
@@ -463,6 +465,7 @@ def render_poster(map_data: Dict, theme: Dict, city: str, country: str,
         height_inches: Height of the poster in inches
         dpi: DPI resolution for output
         progress_callback: Optional callback function(stage_name) called at rendering stages
+        output_format: Output format ('png' or 'pdf', default 'png')
     """
     logger.info(f"Rendering map for {city}, {country}...")
     logger.info(f"Theme: {theme.get('name', 'Unknown')}")
@@ -602,15 +605,23 @@ def render_poster(map_data: Dict, theme: Dict, city: str, country: str,
             color=theme['text'], alpha=0.5, ha='right', va='bottom',
             fontproperties=font_attr, zorder=11)
 
-    # Save with specified DPI
+    # Save with specified DPI and format
     if progress_callback:
         progress_callback("saving")
     
-    logger.info(f"Saving to {output_file}... (DPI: {dpi})")
+    logger.info(f"Saving to {output_file}... (Format: {output_format.upper()}, DPI: {dpi})")
     logger.debug(f"Figure background color: {theme['bg']}")
-    plt.savefig(output_file, dpi=dpi, facecolor=theme['bg'])
+    
+    # Save based on format
+    if output_format.lower() == 'pdf':
+        plt.savefig(output_file, format='pdf', dpi=dpi, facecolor=theme['bg'],
+                   bbox_inches='tight', pad_inches=0)
+        logger.info(f"Done! PDF poster saved as {output_file}")
+    else:
+        plt.savefig(output_file, dpi=dpi, facecolor=theme['bg'])
+        logger.info(f"Done! PNG poster saved as {output_file}")
+    
     plt.close()
-    logger.info(f"Done! Poster saved as {output_file}")
     
     # Verify file was created and get size
     if os.path.exists(output_file):
